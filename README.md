@@ -11,3 +11,5 @@ The C-implementation based on ESP8266 ported on Micro-/CircuitPython for Raspber
 
 I am a beginner in programming with Python. But I have had enough of C! I want to lern Python on micro circuits (ESP32, Raspberry Pico RP2040) and port Pool Controller which is now working for years!
 Who could help me to start an initial base for professional setup of the project?
+
+Let us code a new cool version for next summer season!
