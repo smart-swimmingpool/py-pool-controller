@@ -2,7 +2,7 @@
 
 Python based implementation of [Pool Controller](https://github.com/smart-swimmingpool/pool-controller).
 
-The C-implementation based on ESP8266 ported on Micro-/CircuitPython for Raspberry Pico (RP2040) or ESP32.
+Porting the C-implementation based on ESP8266 on Micro-/Circuit-Python for Raspberry Pico (RP2040) and/or ESP32.
 
 ## Hacktoberfest
 
