@@ -14,6 +14,7 @@ Who could help me to start an initial base for professional setup of the project
 
 Let us code a new cool version for next summer season!
 
+## Community 
+
 Join the community on [Discord](https://discord.gg/ywHCYKdamu)
 
-<iframe src="https://discord.com/widget?id=1024266669964668928&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
