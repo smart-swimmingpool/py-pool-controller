@@ -14,6 +14,15 @@ Who could help me to start an initial base for professional setup of the project
 
 Let us code a new cool version for next summer season!
 
+How to contribute:
+1) ⭐ the repository
+2) Pick an existing issue or create a new one (new feature or bug fixing)
+3) Fork the repository and start working on your branch
+4) Create a Pull Request to the original repo and wait for a code review (expect <12h)
+5) Have fun and learn new things
+
+Happy coding 🚀
+
 ## Community 
 
 Join the community on [Discord](https://discord.gg/ywHCYKdamu)
