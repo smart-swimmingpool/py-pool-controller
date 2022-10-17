@@ -29,7 +29,7 @@ class PoolControllerContext:
             self.led.on()
             time.sleep(0.5)
             print("current time: " + str(time.localtime()))
-            self.ntptime.loop()
+            self.ntptime.tick()
 
     # Stop the dispatch loop
     def stop(self):
