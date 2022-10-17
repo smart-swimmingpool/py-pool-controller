@@ -1,20 +1,22 @@
-from machine import Pin
+import machine
 import time
 import network
-
+import json
+import utils
 
 # Core controller class
 class PoolControllerContext:
 
     # Constructor
-    def __init__(self, ssid, wifi_password):
+    def __init__(self, ssid: str, wifi_password: str):
         print("Initializing PoolControllerContext...")
         self.__initialize_wifi(ssid, wifi_password)
-        self.led = Pin(2, Pin.OUT)
+        self.led = machine.Pin(2, machine.Pin.OUT)
         self.is_running = True
 
     # Start the dispatch loop
     def run(self):
+        print("Running dispatch loop...")
         self.is_running = True
         while self.is_running:
             self.led.off()
@@ -27,12 +29,21 @@ class PoolControllerContext:
         self.is_running = False
 
     # Private method - initialize WI-FI
-    def __initialize_wifi(self, ssid, wifi_password):
+    def __initialize_wifi(self, ssid: str, wifi_password: str):
+        assert ssid is not None and ssid != ""
+        assert wifi_password is not None and wifi_password != ""
         self.wifi_module = network.WLAN(network.STA_IF)
         self.wifi_module.active(True)
         for connection in self.wifi_module.scan():
             print("Found available WI-FI connection: " + str(connection))
-        self.wifi_module.connect(ssid, wifi_password)
+            if connection[0] == ssid:
+                print("Connecting to specified WI-FI connection with SSID " + ssid)
+                self.wifi_module.connect(ssid, wifi_password)
+                while not self.wifi_module.isconnected():
+                    machine.idle()
+                print("Connection established")
+                break
+
         assert self.wifi_module.isconnected(), "Failed to connect to WI-FI"
         print("WI-FI connected: " + str(self.wifi_module.ifconfig()))
 
@@ -43,8 +54,23 @@ def main():
     print("* Pool Controller Py            *")
     print("*-------------------------------*")
 
-    ssid = "Your SSID"
-    wifi_password = "Your WiFi Password"
+    # Load WI-FI configuration
+
+    ssid: str = ""
+    wifi_password: str = ""
+    config_file: str = "wifi_config.json"
+
+    if not utils.does_file_exists(config_file):
+        with open(config_file, "w") as f:
+            content = '{"ssid": "Your SSID", "password": "Your WiFi Password"}'
+            json.dump(content, f)
+
+    with open(config_file, "r") as f:
+        data = json.load(f)
+        ssid = data["ssid"]
+        wifi_password = data["password"]
+
+    # Create controller context
     controller = PoolControllerContext(ssid, wifi_password)
     controller.run()
 
