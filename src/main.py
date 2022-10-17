@@ -3,6 +3,7 @@ import time
 import network
 import json
 import utils
+import ntptime
 
 # Core controller class
 class PoolControllerContext:
@@ -13,6 +14,9 @@ class PoolControllerContext:
         self.__initialize_wifi(ssid, wifi_password)
         self.led = machine.Pin(2, machine.Pin.OUT)
         self.is_running = True
+        
+        # Update Time via NTP Timzone UTC -2
+        ntptime.time(-2)
 
     # Start the dispatch loop
     def run(self):
@@ -23,6 +27,7 @@ class PoolControllerContext:
             time.sleep(0.5)
             self.led.on()
             time.sleep(0.5)
+            print("current time: " + str(time.localtime()))
 
     # Stop the dispatch loop
     def stop(self):
