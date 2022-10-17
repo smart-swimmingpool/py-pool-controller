@@ -2,6 +2,7 @@ from machine import Pin
 import time
 import network
 
+
 # Core controller class
 class PoolControllerContext:
 
@@ -30,10 +31,11 @@ class PoolControllerContext:
         self.wifi_module = network.WLAN(network.STA_IF)
         self.wifi_module.active(True)
         for connection in self.wifi_module.scan():
-            print(f"Found available WI-FI connection: {connection}")
+            print("Found available WI-FI connection: " + str(connection))
         self.wifi_module.connect(ssid, wifi_password)
         assert self.wifi_module.isconnected(), "Failed to connect to WI-FI"
-        print(f"WI-FI connected: {self.wifi_module.ifconfig()}")
+        print("WI-FI connected: " + str(self.wifi_module.ifconfig()))
+
 
 # Main function
 def main():
