@@ -8,59 +8,56 @@
 #
 # Source: https://github.com/peterhinch/micropython-samples/blob/master/ntptime/ntptime.py
 
-import socket
-import struct
-import select
 import time
-from datetime import timedelta
+import utime    # lib to convert unixtime in array wiht hour, min, sec,day,month,year
+import ntptime  # NTP Support
 from time import gmtime
+from machine import RTC # Realtime Clock
 
 
 class NTPtime:
-    NTP_DELTA = 3155673600 if gmtime(0)[0] == 2000 else 2208988800
-    SYNC_INTERVAL = 5.0
-    DEFAULT_HOST = "pool.ntp.org"  # The NTP host can be configured at runtime by doing: ntptime.host = 'myhost.org'
-
+    last_request_timestamp = 0
+    SYNC_INTERVAL = 3600.0
+    rtc = RTC()
+    
     # Constructor
-    # hrs_offset: Local time offset in hrs relative to UTC
-    def __init__(self, ntp_host=DEFAULT_HOST, hrs_offset=0):
-        self.host = ntp_host
+    # ntp_host: host can be configured at runtime by doing: ntptime.host = 'myhost.org'
+    # hrs_offset: local time offset in hrs relative to UTC
+    def __init__(self, ntp_host="pool.ntp.org", hrs_offset=0):
+        ntptime.host = ntp_host
         self.threshold_time = 0.0
-        self.time = timedelta()
         self.hrs_offset = hrs_offset
         self.sync_time()
 
-    def sync_time(self) -> int: # Local time offset in hrs relative to UTC
-        ntp_query = bytearray(48)
-        ntp_query[0] = 0x1B
-        try:
-            addr = socket.getaddrinfo(self.host, 123)[0][-1]
-        except OSError:
-            return 0
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        poller = select.poll()
-        poller.register(sock, select.POLLIN)
-        try:
-            sock.sendto(ntp_query, addr)
-            if poller.poll(1000):  # time in milliseconds
-                msg = sock.recv(48)
-                val = struct.unpack("!I", msg[40:44])[0]  # Can return 0
-                return int(max(val - self.NTP_DELTA + (self.hrs_offset * -1) * 3600, 0))
-        except OSError:
-            return 0
-        finally:
-            sock.close()
-        return 0  # Timeout or LAN error occurred
+    def sync_time(self): # Local time offset in hrs relative to UTC
+        print("sync time ...")
+        try: 
+            ntptime.settime(self.hrs_offset)
+            self.last_request_timestamp = time.time()
+            self.rtc.datetime(time.gmtime(self.last_request_timestamp)) # set a specific date and time
+        except:
+            print("Connecting NTP-Server failed")
+            self.last_request_timestamp = time.time()
+        return time.time()
 
     def tick(self):  # loop to sync time
         t = time.time()
         if self.threshold_time < t:
-            print("Syncing time from server...")
+            print('Update time via NTP from host:', ntptime.host)
             self.threshold_time = t + self.SYNC_INTERVAL
-            self.time = timedelta(seconds=self.sync_time())
-            print("New time: " + str(self.time))
+            self.time = self.sync_time()
+            print("New time: " + str(time.time()))
 
-
-ntptime = NTPtime("pool.ntp.org", -2)
-while True:
-    ntptime.tick()
+    def tzoffset(now):
+        # Auszüge von https://community.hiveeyes.org/t/berechnung-von-sommerzeit-winterzeit-in-micropython/3183
+        year = now[0]       #get current year
+        HHMarch   = time.mktime((year,3 ,(31-(int(5*year/4+4))%7),1,0,0,0,0,0)) #Time of March change to CEST
+        HHOctober = time.mktime((year,10,(31-(int(5*year/4+1))%7),1,0,0,0,0,0)) #Time of October change to CET
+        now=time.time()
+        if now < HHMarch :               # we are before last sunday of march
+            tzoffset=1                   # CET:  UTC+1H
+        elif now < HHOctober :           # we are before last sunday of october
+            tzoffset=2                   # CEST: UTC+2H
+        else:                            # we are after last sunday of october
+            tzoffset=1                   # CET:  UTC+1H
+        return(tzoffset)

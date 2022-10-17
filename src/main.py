@@ -17,7 +17,7 @@ class PoolControllerContext:
         self.is_running = True
         
         # Update Time via NTP Timzone UTC -2
-        self.ntptime = NTPtime("pool.ntp.org", self.TIMEZONE_OFFSET)
+        self.ntptime = NTPtime("ptbtime1.ptb.de", self.TIMEZONE_OFFSET)
 
     # Start the dispatch loop
     def run(self):
