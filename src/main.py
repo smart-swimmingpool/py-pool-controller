@@ -8,9 +8,9 @@ import utils
 class PoolControllerContext:
 
     # Constructor
-    def __init__(self, ssid: str, wifi_password: str, **wifi_config):
+    def __init__(self, ssid: str, wifi_password: str):
         print("Initializing PoolControllerContext...")
-        self.__initialize_wifi(ssid, wifi_password, **wifi_config)
+        self.__initialize_wifi(ssid, wifi_password)
         self.led = machine.Pin(2, machine.Pin.OUT)
         self.is_running = True
 
@@ -29,11 +29,10 @@ class PoolControllerContext:
         self.is_running = False
 
     # Private method - initialize WI-FI
-    def __initialize_wifi(self, ssid: str, wifi_password: str, **wifi_config):
+    def __initialize_wifi(self, ssid: str, wifi_password: str):
         assert ssid is not None and ssid != ""
         assert wifi_password is not None and wifi_password != ""
         self.wifi_module = network.WLAN(network.STA_IF)
-        self.wifi_module.config(**wifi_config)
         self.wifi_module.active(True)
         for connection in self.wifi_module.scan():
             print("Found available WI-FI connection: " + str(connection))
