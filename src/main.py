@@ -1,7 +1,9 @@
-from machine import Pin
+import machine
 import time
 import network
-
+import json
+import os
+import utils
 
 # Core controller class
 class PoolControllerContext:
@@ -10,11 +12,12 @@ class PoolControllerContext:
     def __init__(self, ssid, wifi_password):
         print("Initializing PoolControllerContext...")
         self.__initialize_wifi(ssid, wifi_password)
-        self.led = Pin(2, Pin.OUT)
+        self.led = machine.Pin(2, machine.Pin.OUT)
         self.is_running = True
 
     # Start the dispatch loop
     def run(self):
+        print("Running dispatch loop...")
         self.is_running = True
         while self.is_running:
             self.led.off()
@@ -28,6 +31,8 @@ class PoolControllerContext:
 
     # Private method - initialize WI-FI
     def __initialize_wifi(self, ssid, wifi_password):
+        assert ssid is not None and ssid != ""
+        assert wifi_password is not None and wifi_password != ""
         self.wifi_module = network.WLAN(network.STA_IF)
         self.wifi_module.active(True)
         for connection in self.wifi_module.scan():
@@ -43,8 +48,23 @@ def main():
     print("* Pool Controller Py            *")
     print("*-------------------------------*")
 
-    ssid = "Your SSID"
-    wifi_password = "Your WiFi Password"
+    # Load WI-FI configuration
+
+    ssid = None
+    wifi_password = None
+    config_file = "wifi_config.json"
+
+    if not utils.does_file_exists(config_file):
+        with open(config_file, "w") as f:
+            content = '{"ssid": "Your SSID", "password": "Your WiFi Password"}'
+            json.dump(content, f)
+
+    with open(config_file, "r") as f:
+        data = json.load(f)
+        ssid = data["ssid"]
+        wifi_password = data["password"]
+
+    # Create controller context
     controller = PoolControllerContext(ssid, wifi_password)
     controller.run()
 
