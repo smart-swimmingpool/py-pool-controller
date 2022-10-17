@@ -3,7 +3,7 @@ import time
 import network
 import json
 import utils
-import ntptime
+from ntptime import NTPtime
 
 # Core controller class
 class PoolControllerContext:
@@ -17,7 +17,7 @@ class PoolControllerContext:
         self.is_running = True
         
         # Update Time via NTP Timzone UTC -2
-        ntptime.time(self.TIMEZONE_OFFSET)
+        self.ntptime = NTPtime("pool.ntp.org", self.TIMEZONE_OFFSET)
 
     # Start the dispatch loop
     def run(self):
@@ -29,6 +29,7 @@ class PoolControllerContext:
             self.led.on()
             time.sleep(0.5)
             print("current time: " + str(time.localtime()))
+            self.ntptime.loop()
 
     # Stop the dispatch loop
     def stop(self):
