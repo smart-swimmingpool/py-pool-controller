@@ -7,6 +7,7 @@ import ntptime
 
 # Core controller class
 class PoolControllerContext:
+    TIMEZONE_OFFSET = -2 # Offset of timezone to UTC
 
     # Constructor
     def __init__(self, ssid: str, wifi_password: str):
@@ -16,7 +17,7 @@ class PoolControllerContext:
         self.is_running = True
         
         # Update Time via NTP Timzone UTC -2
-        ntptime.time(-2)
+        ntptime.time(self.TIMEZONE_OFFSET)
 
     # Start the dispatch loop
     def run(self):
