@@ -2,23 +2,26 @@ import machine
 import time
 import network
 import json
+import logging
 import utils
 from timesync import TimeSync
 
 # Core controller class
 class PoolControllerContext:
-
+    log = logging.getLogger(__name__)
+    
     # Constructor
     def __init__(self, ssid: str, wifi_password: str):
-        print("Initializing PoolControllerContext...")
+        self.log.debug("Initializing PoolControllerContext...")
         self.led = machine.Pin(2, machine.Pin.OUT)
         self.__initialize_wifi(ssid, wifi_password)
+        self.__install_dependencies()
         self.is_running = True
-        self.time_sync = TimeSync("pool.ntp.org")
+        self.time_sync = TimeSync("fritz.box")
 
     # Start the dispatch loop
     def run(self):
-        print("Running dispatch loop...")
+        self.log.info("Running dispatch loop...")
         self.is_running = True
         while self.is_running:
             self.led.off()
@@ -38,16 +41,19 @@ class PoolControllerContext:
         assert wifi_password is not None and wifi_password != ""
         self.wifi_module = network.WLAN(network.STA_IF)
         self.wifi_module.active(True)
-        print("Connecting to specified WI-FI connection with SSID " + ssid)
+        self.log.debug("Connecting to specified WI-FI connection with SSID " + ssid)
         self.wifi_module.connect(ssid, wifi_password)
         while not self.wifi_module.isconnected():
             machine.idle()
-            print('.', end='')
-        print("Connection established")
+        self.log.debug("Connection established")
 
         assert self.wifi_module.isconnected(), "Failed to connect to WI-FI"
-        print("WI-FI connected: " + str(self.wifi_module.ifconfig()))
+        self.log.info("WI-FI connected: " + str(self.wifi_module.ifconfig()))
 
+    def __install_dependencies(self):
+        from setup.installer import Installer
+        installer = Installer()
+        installer.install_deps()
 
 # Main function
 def main():
@@ -55,6 +61,9 @@ def main():
     print("* Pool Controller Py            *")
     print("*-------------------------------*")
 
+
+    logging.basicConfig(level=logging.INFO)
+    logging.getLogger().addHandler(LogHandler())
     # Load WI-FI configuration
 
     ssid: str = ""
@@ -75,6 +84,9 @@ def main():
     controller = PoolControllerContext(ssid, wifi_password)
     controller.run()
 
-
+class LogHandler(logging.Handler):
+    def emit(self, record):
+        print("level=%(levelname)s \tname=%(name)s: %(message)s" % record.__dict__)
+        
 if __name__ == "__main__":
     main()

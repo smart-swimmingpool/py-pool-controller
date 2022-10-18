@@ -11,14 +11,14 @@
 import time
 import utime    # lib to convert unixtime in array wiht hour, min, sec,day,month,year
 import ntptime  # NTP Support
-from time import gmtime
-from machine import RTC # Realtime Clock
-
+import machine
+import logging
 
 class TimeSync:
+    log = logging.getLogger(__name__)
     last_request_timestamp = 0
-    SYNC_INTERVAL = 3600.0
-    rtc = RTC()
+    SYNC_INTERVAL = 360.0
+    rtc = machine.RTC()
     
     # Constructor
     # ntp_host: host can be configured at runtime by doing: ntptime.host = 'myhost.org'
@@ -29,13 +29,12 @@ class TimeSync:
         self.sync_time()
 
     def sync_time(self): # Local time offset in hrs relative to UTC
-        print("sync time ...")
+        self.log.debug("sync time ...")
         try: 
-            ntptime.settime()                
+            ntptime.settime()             
             self.last_request_timestamp = time.time()
-            self.rtc.datetime(time.gmtime(self.last_request_timestamp)) # set a specific date and time
         except Exception as e:
-            print("Connecting NTP-Server failed")
+            self.log.error("Connecting NTP-Server failed")
             # printing stack trace
             import sys
             sys.print_exception(e)      
@@ -45,11 +44,11 @@ class TimeSync:
     def tick(self):  # loop to sync time
         t = time.time()
         if self.threshold_time < t:
-            print('Update time via NTP from host:', ntptime.host)
+            self.log.debug('Update time via NTP from host:', ntptime.host)
             self.threshold_time = t + self.SYNC_INTERVAL
             self.time = self.rtc.datetime()
             now = self.rtc.datetime()
-            print('Datum/UTCTime/TZ:',now[2],'.',now[1],'.',now[0],"  ",now[4],':',now[5],':',now[6]," TZ:",self.tzoffset(now))
+            self.log.info("Datum/UTCTime/TZ: %s.%s.%s  %s:%s:%s TZ %s", now[2], now[1], now[0], now[4], now[5], now[6], self.tzoffset(now))
 
     def tzoffset(self, now):
         # Auszüge von https://community.hiveeyes.org/t/berechnung-von-sommerzeit-winterzeit-in-micropython/3183
