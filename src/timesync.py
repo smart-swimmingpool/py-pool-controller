@@ -15,7 +15,7 @@ from time import gmtime
 from machine import RTC # Realtime Clock
 
 
-class NTPtime:
+class TimeSync:
     last_request_timestamp = 0
     SYNC_INTERVAL = 3600.0
     rtc = RTC()
@@ -23,20 +23,22 @@ class NTPtime:
     # Constructor
     # ntp_host: host can be configured at runtime by doing: ntptime.host = 'myhost.org'
     # hrs_offset: local time offset in hrs relative to UTC
-    def __init__(self, ntp_host="pool.ntp.org", hrs_offset=0):
+    def __init__(self, ntp_host="pool.ntp.org"):
         ntptime.host = ntp_host
         self.threshold_time = 0.0
-        self.hrs_offset = hrs_offset
         self.sync_time()
 
     def sync_time(self): # Local time offset in hrs relative to UTC
         print("sync time ...")
         try: 
-            ntptime.settime(self.hrs_offset)
+            ntptime.settime()                
             self.last_request_timestamp = time.time()
             self.rtc.datetime(time.gmtime(self.last_request_timestamp)) # set a specific date and time
-        except:
+        except Exception as e:
             print("Connecting NTP-Server failed")
+            # printing stack trace
+            import sys
+            sys.print_exception(e)      
             self.last_request_timestamp = time.time()
         return time.time()
 
@@ -45,10 +47,11 @@ class NTPtime:
         if self.threshold_time < t:
             print('Update time via NTP from host:', ntptime.host)
             self.threshold_time = t + self.SYNC_INTERVAL
-            self.time = self.sync_time()
-            print("New time: " + str(time.time()))
+            self.time = self.rtc.datetime()
+            now = self.rtc.datetime()
+            print('Datum/UTCTime/TZ:',now[2],'.',now[1],'.',now[0],"  ",now[4],':',now[5],':',now[6]," TZ:",self.tzoffset(now))
 
-    def tzoffset(now):
+    def tzoffset(self, now):
         # Auszüge von https://community.hiveeyes.org/t/berechnung-von-sommerzeit-winterzeit-in-micropython/3183
         year = now[0]       #get current year
         HHMarch   = time.mktime((year,3 ,(31-(int(5*year/4+4))%7),1,0,0,0,0,0)) #Time of March change to CEST
