@@ -3,6 +3,7 @@ import time
 import network
 import json
 import utils
+from timesync import TimeSync
 
 # Core controller class
 class PoolControllerContext:
@@ -10,9 +11,10 @@ class PoolControllerContext:
     # Constructor
     def __init__(self, ssid: str, wifi_password: str):
         print("Initializing PoolControllerContext...")
-        self.__initialize_wifi(ssid, wifi_password)
         self.led = machine.Pin(2, machine.Pin.OUT)
+        self.__initialize_wifi(ssid, wifi_password)
         self.is_running = True
+        self.time_sync = TimeSync("pool.ntp.org")
 
     # Start the dispatch loop
     def run(self):
@@ -23,6 +25,8 @@ class PoolControllerContext:
             time.sleep(0.5)
             self.led.on()
             time.sleep(0.5)
+            self.time_sync.tick()
+            machine.idle()
 
     # Stop the dispatch loop
     def stop(self):
@@ -34,15 +38,12 @@ class PoolControllerContext:
         assert wifi_password is not None and wifi_password != ""
         self.wifi_module = network.WLAN(network.STA_IF)
         self.wifi_module.active(True)
-        for connection in self.wifi_module.scan():
-            print("Found available WI-FI connection: " + str(connection))
-            if connection[0] == ssid:
-                print("Connecting to specified WI-FI connection with SSID " + ssid)
-                self.wifi_module.connect(ssid, wifi_password)
-                while not self.wifi_module.isconnected():
-                    machine.idle()
-                print("Connection established")
-                break
+        print("Connecting to specified WI-FI connection with SSID " + ssid)
+        self.wifi_module.connect(ssid, wifi_password)
+        while not self.wifi_module.isconnected():
+            machine.idle()
+            print('.', end='')
+        print("Connection established")
 
         assert self.wifi_module.isconnected(), "Failed to connect to WI-FI"
         print("WI-FI connected: " + str(self.wifi_module.ifconfig()))
