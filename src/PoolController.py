@@ -1,6 +1,7 @@
 import logging
 import machine
 import time
+import log
 from timesync import TimeSync
 
 # Core controller class
@@ -34,8 +35,3 @@ class PoolControllerContext:
     # Stop the dispatch loop
     def stop(self):
         self.is_running = False
-
-
-class LogHandler(logging.Handler):
-    def emit(self, record):
-        print("level=%(levelname)s \tname=%(name)s: %(message)s" % record.__dict__)
