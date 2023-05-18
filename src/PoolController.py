@@ -1,7 +1,6 @@
 import logging
 import machine
 import time
-import log
 from timesync import TimeSync
 
 # Core controller class
@@ -13,12 +12,9 @@ class PoolControllerContext:
     def __init__(self, ssid: str, wifi_password: str):
         self.log.debug("Initializing PoolControllerContext...")
         self.led = machine.Pin(2, machine.Pin.OUT)
-        
-        logging.basicConfig(level=logging.INFO)
-        logging.getLogger().addHandler(LogHandler())
     
         self.is_running = True
-        self.time_sync = TimeSync("fritz.box")
+        self.time_sync = TimeSync("de.pool.ntp.org")
 
     # Start the dispatch loop
     def run(self):

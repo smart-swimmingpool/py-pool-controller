@@ -1,3 +1,6 @@
+import logging
+import time
+
 import machine
 import network
 import json
@@ -26,6 +29,8 @@ def main():
 
     initialize_wifi(ssid, wifi_password)
     install_dependencies()
+
+    logging.basicConfig(level=logging.DEBUG)
     
     # Create controller context
     from PoolController import PoolControllerContext
@@ -37,16 +42,31 @@ def main():
 def initialize_wifi(ssid: str, wifi_password: str):
     assert ssid is not None and ssid != ""
     assert wifi_password is not None and wifi_password != ""
-    wifi_module = network.WLAN(network.STA_IF)
-    wifi_module.active(True)
-    print("Connecting to specified WI-FI connection with SSID " + ssid)
-    wifi_module.connect(ssid, wifi_password)
-    while not wifi_module.isconnected():
-        machine.idle()
-    print("Connection established")
+    try:
+        wifi_module = network.WLAN(network.STA_IF)
+        wifi_module.active(True)
+        print("Connecting to specified WI-FI connection with SSID " + ssid)
+        wifi_module.connect(ssid, wifi_password)
+        time.sleep(3)
+        while not wifi_module.isconnected():
+            print(".")
+            time.sleep(3)
+        print("Connection established")
+        assert wifi_module.isconnected(), "Failed to connect to WI-FI"
+        print("WI-FI connected: " + str(wifi_module.ifconfig()))
+    except OSError as e:
+        print('--- Caught Exception ---')
+        import sys
+        sys.print_exception(e)
+    except KeyboardInterrupt as e:
+        print('--- Caught Exception ---')
+        import sys
+        sys.print_exception(e)
+    except Exception as e:
+        print('--- Caught Exception ---')
+        import sys
+        sys.print_exception(e)
 
-    assert wifi_module.isconnected(), "Failed to connect to WI-FI"
-    print("WI-FI connected: " + str(wifi_module.ifconfig()))
 
 # Private method - install required dependencies
 def install_dependencies():
