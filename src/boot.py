@@ -1,3 +1,7 @@
+# Copyright (c) 2018-2026 Smart Swimming Pool, Stephan Strittmatter
+#
+# SPDX-License-Identifier: MIT
+
 # This file is executed on every boot (including wake-boot from deepsleep)
 # import esp
 # esp.osdebug(None)

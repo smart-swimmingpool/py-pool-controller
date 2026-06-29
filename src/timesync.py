@@ -1,3 +1,7 @@
+# Copyright (c) 2018-2026 Smart Swimming Pool, Stephan Strittmatter
+#
+# SPDX-License-Identifier: MIT
+
 # Adapted from official ntptime by Peter Hinch July 2022
 # The main aim is portability:
 # Detects host device's epoch and returns time relative to that.
