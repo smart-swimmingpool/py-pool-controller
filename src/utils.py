@@ -1,3 +1,7 @@
+# Copyright (c) 2018-2026 Smart Swimming Pool, Stephan Strittmatter
+#
+# SPDX-License-Identifier: MIT
+
 import os
 
 def does_fs_entry_exists(filename: str) -> bool:
